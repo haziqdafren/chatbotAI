@@ -100,6 +100,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Function to handle API errors
+    function handleApiError(error, message = 'Maaf, terjadi kesalahan. Silakan coba lagi.') {
+        console.error('API Error:', error);
+        addMessage(message);
+    }
+
+    // Function to make API calls with retry
+    async function makeApiCall(url, options, retries = 3) {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            }
+        }
+    }
+
     // Function to show demo mode
     async function runDemo() {
         isDemoRunning = true;
@@ -119,33 +141,32 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         for (const [message, description] of demoConversations) {
-            if (!isDemoRunning) break; // Stop if demo is cancelled
+            if (!isDemoRunning) break;
             
             addMessage(message, true);
             const typingIndicator = showTypingIndicator();
             
             try {
-                const response = await fetch('/api/chat', {
+                const data = await makeApiCall('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message })
                 });
-                
-                const data = await response.json();
+
                 removeTypingIndicator(typingIndicator);
                 
                 if (data.response) {
                     addMessage(data.response);
                 }
                 
-                // Wait for 1.5 seconds between messages
                 await new Promise(resolve => {
                     demoTimeout = setTimeout(resolve, 1500);
                 });
             } catch (error) {
                 console.error('Error:', error);
                 removeTypingIndicator(typingIndicator);
-                addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.');
+                handleApiError(error);
+                break;
             }
         }
         
@@ -164,8 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to show statistics
     async function showStatistics() {
         try {
-            const response = await fetch('/api/statistics');
-            const data = await response.json();
+            const data = await makeApiCall('/api/statistics');
             
             // Animate statistics numbers
             animateNumber('total-intents', data.total_intents);
@@ -173,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             animateNumber('total-responses', data.total_responses);
         } catch (error) {
             console.error('Error fetching statistics:', error);
+            handleApiError(error, 'Gagal memuat statistik. Silakan coba lagi.');
         }
     }
 
@@ -262,22 +283,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const typingIndicator = showTypingIndicator();
 
         try {
-            const response = await fetch('/api/chat', {
+            const data = await makeApiCall('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message })
             });
 
-            const data = await response.json();
             removeTypingIndicator(typingIndicator);
 
             if (data.response) {
                 addMessage(data.response);
+            } else {
+                handleApiError(new Error('No response from server'));
             }
         } catch (error) {
             console.error('Error:', error);
             removeTypingIndicator(typingIndicator);
-            addMessage('Maaf, terjadi kesalahan. Silakan coba lagi.');
+            handleApiError(error);
         }
     });
 

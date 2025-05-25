@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from profitpal import ProfitPal
 import os
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 bot = ProfitPal()
 
 @app.route('/')
@@ -19,6 +21,7 @@ def chat():
         response = bot.chat(data['message'])
         return jsonify({'response': response})
     except Exception as e:
+        print(f"Error in chat endpoint: {str(e)}")  # Add logging
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/statistics')
@@ -34,6 +37,7 @@ def get_statistics():
             'total_responses': total_responses
         })
     except Exception as e:
+        print(f"Error in statistics endpoint: {str(e)}")  # Add logging
         return jsonify({'error': str(e)}), 500
 
 # This is for local development
