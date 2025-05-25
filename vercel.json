@@ -4,6 +4,10 @@
         {
             "src": "app.py",
             "use": "@vercel/python"
+        },
+        {
+            "src": "static/**",
+            "use": "@vercel/static"
         }
     ],
     "routes": [
@@ -11,7 +15,8 @@
             "src": "/static/(.*)",
             "dest": "/static/$1",
             "headers": {
-                "Cache-Control": "public, max-age=31536000, immutable"
+                "Cache-Control": "public, max-age=31536000, immutable",
+                "Access-Control-Allow-Origin": "*"
             }
         },
         {
@@ -20,15 +25,17 @@
             "methods": ["GET", "POST", "OPTIONS"],
             "headers": {
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Credentials": "true"
             }
         },
         {
             "src": "/(.*)",
             "dest": "app.py",
             "headers": {
-                "Cache-Control": "public, max-age=0, must-revalidate"
+                "Cache-Control": "public, max-age=0, must-revalidate",
+                "Access-Control-Allow-Origin": "*"
             }
         }
     ],
