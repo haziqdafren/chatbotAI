@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded - Initializing chat interface...');
+    
+    // Get all required elements
     const chatForm = document.getElementById('chat-form');
     const userInput = document.getElementById('user-input');
     const chatMessages = document.getElementById('chat-messages');
@@ -8,6 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToMenuBtn = document.getElementById('back-to-menu');
     const backToMenuStatsBtn = document.getElementById('back-to-menu-stats');
     const menuButtons = document.querySelectorAll('.menu-btn');
+
+    // Verify all elements are found
+    if (!chatForm || !userInput || !chatMessages || !menuContainer || !chatContainer || !statsContainer || !backToMenuBtn || !backToMenuStatsBtn) {
+        console.error('Required elements not found:', {
+            chatForm: !!chatForm,
+            userInput: !!userInput,
+            chatMessages: !!chatMessages,
+            menuContainer: !!menuContainer,
+            chatContainer: !!chatContainer,
+            statsContainer: !!statsContainer,
+            backToMenuBtn: !!backToMenuBtn,
+            backToMenuStatsBtn: !!backToMenuStatsBtn
+        });
+        return;
+    }
+
+    console.log('All required elements found');
 
     // Flag to track if demo is running
     let isDemoRunning = false;
@@ -108,14 +128,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to make API calls with retry
     async function makeApiCall(url, options, retries = 3) {
+        console.log(`Making API call to ${url}`, options);
         for (let i = 0; i < retries; i++) {
             try {
-                const response = await fetch(url, options);
+                const response = await fetch(url, {
+                    ...options,
+                    credentials: 'include',
+                    mode: 'cors'
+                });
+                console.log(`API Response status: ${response.status}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                return await response.json();
+                const data = await response.json();
+                console.log('API Response data:', data);
+                return data;
             } catch (error) {
+                console.error(`API call attempt ${i + 1} failed:`, error);
                 if (i === retries - 1) throw error;
                 await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
             }
@@ -216,73 +245,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }, duration / steps);
     }
 
-    // Menu navigation
+    // Menu navigation with error handling
     menuButtons.forEach((button, index) => {
-        button.addEventListener('click', () => {
+        console.log(`Adding click handler to menu button ${index}`);
+        button.addEventListener('click', (e) => {
+            console.log(`Menu button ${index} clicked`);
+            e.preventDefault();
+            
             // Add click animation
             button.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 button.style.transform = '';
             }, 100);
 
-            switch(index) {
-                case 0: // Chat
-                    stopDemo(); // Stop any running demo
-                    menuContainer.classList.add('hidden');
-                    chatContainer.classList.remove('hidden');
-                    resetChat(); // Reset chat with welcome message
-                    break;
-                case 1: // Demo
-                    menuContainer.classList.add('hidden');
-                    chatContainer.classList.remove('hidden');
-                    runDemo();
-                    break;
-                case 2: // Statistics
-                    stopDemo(); // Stop any running demo
-                    menuContainer.classList.add('hidden');
-                    statsContainer.classList.remove('hidden');
-                    showStatistics();
-                    break;
-                case 3: // Exit
-                    if (confirm('Apakah Anda yakin ingin keluar?')) {
-                        window.close();
-                    }
-                    break;
+            try {
+                switch(index) {
+                    case 0: // Chat
+                        console.log('Switching to chat mode');
+                        stopDemo();
+                        menuContainer.classList.add('hidden');
+                        chatContainer.classList.remove('hidden');
+                        resetChat();
+                        break;
+                    case 1: // Demo
+                        console.log('Starting demo mode');
+                        menuContainer.classList.add('hidden');
+                        chatContainer.classList.remove('hidden');
+                        runDemo();
+                        break;
+                    case 2: // Statistics
+                        console.log('Switching to statistics');
+                        stopDemo();
+                        menuContainer.classList.add('hidden');
+                        statsContainer.classList.remove('hidden');
+                        showStatistics();
+                        break;
+                    case 3: // Exit
+                        console.log('Exit requested');
+                        if (confirm('Apakah Anda yakin ingin keluar?')) {
+                            window.close();
+                        }
+                        break;
+                }
+            } catch (error) {
+                console.error('Error in menu navigation:', error);
+                handleApiError(error);
             }
         });
     });
 
-    // Back to menu buttons
-    backToMenuBtn.addEventListener('click', () => {
-        stopDemo(); // Stop any running demo
-        chatContainer.classList.add('hidden');
-        menuContainer.classList.remove('hidden');
+    // Back to menu buttons with error handling
+    backToMenuBtn.addEventListener('click', (e) => {
+        console.log('Back to menu button clicked');
+        e.preventDefault();
+        try {
+            stopDemo();
+            chatContainer.classList.add('hidden');
+            menuContainer.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error returning to menu:', error);
+            handleApiError(error);
+        }
     });
 
-    backToMenuStatsBtn.addEventListener('click', () => {
-        statsContainer.classList.add('hidden');
-        menuContainer.classList.remove('hidden');
+    backToMenuStatsBtn.addEventListener('click', (e) => {
+        console.log('Back to menu from stats button clicked');
+        e.preventDefault();
+        try {
+            statsContainer.classList.add('hidden');
+            menuContainer.classList.remove('hidden');
+        } catch (error) {
+            console.error('Error returning to menu from stats:', error);
+            handleApiError(error);
+        }
     });
 
-    // Handle form submission
+    // Handle form submission with error handling
     chatForm.addEventListener('submit', async (e) => {
+        console.log('Chat form submitted');
         e.preventDefault();
         
         const message = userInput.value.trim();
         if (!message) return;
 
-        // If demo is running, stop it
-        if (isDemoRunning) {
-            stopDemo();
-            resetChat();
-        }
-
-        addMessage(message, true);
-        userInput.value = '';
-
-        const typingIndicator = showTypingIndicator();
-
         try {
+            if (isDemoRunning) {
+                stopDemo();
+                resetChat();
+            }
+
+            addMessage(message, true);
+            userInput.value = '';
+
+            const typingIndicator = showTypingIndicator();
+
             const data = await makeApiCall('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -297,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleApiError(new Error('No response from server'));
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error in chat form submission:', error);
             removeTypingIndicator(typingIndicator);
             handleApiError(error);
         }
@@ -314,6 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Focus input on load
+    // Initialize the interface
+    console.log('Initializing interface...');
+    resetChat();
     userInput.focus();
+    console.log('Interface initialization complete');
 }); 
