@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfitPal - Your Investment Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2 gradient-text header-title">ProfitPal 💰</h1>
+            <p class="text-gray-600 header-subtitle">Your trusted investment companion</p>
+        </header>
+
+        <!-- Menu Container -->
+        <div id="menu-container" class="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 animate__animated animate__fadeIn">
+            <h2 class="text-2xl font-semibold mb-6 text-center gradient-text">Welcome to ProfitPal!</h2>
+            <div class="space-y-4">
+                <button class="menu-btn w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+                    Start Chat 💬
+                </button>
+                <button class="menu-btn w-full py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+                    Run Demo 🎮
+                </button>
+                <button class="menu-btn w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+                    View Statistics 📊
+                </button>
+                <button class="menu-btn w-full py-3 px-6 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+                    Exit ❌
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div id="chat-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold gradient-text">Chat with ProfitPal</h2>
+                <button id="back-to-menu" class="back-btn text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                    ← Back to Menu
+                </button>
+            </div>
+            <div id="chat-messages" class="h-96 overflow-y-auto mb-4 p-4 bg-gray-50 rounded-xl">
+                <!-- Messages will be added here -->
+            </div>
+            <form id="chat-form" class="flex gap-2">
+                <input type="text" id="user-input" class="flex-1 p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300" placeholder="Type your message...">
+                <button type="submit" id="send-btn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all duration-300">
+                    Send
+                </button>
+            </form>
+        </div>
+
+        <!-- Statistics Container -->
+        <div id="stats-container" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-6 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold gradient-text">Statistics</h2>
+                <button id="back-to-menu-stats" class="back-btn text-gray-600 hover:text-blue-600 transition-colors duration-300">
+                    ← Back to Menu
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="stat-card p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl text-center">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Intents</h3>
+                    <p id="total-intents" class="text-3xl font-bold gradient-text">0</p>
+                </div>
+                <div class="stat-card p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl text-center">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Keywords</h3>
+                    <p id="total-keywords" class="text-3xl font-bold gradient-text">0</p>
+                </div>
+                <div class="stat-card p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl text-center">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Total Responses</h3>
+                    <p id="total-responses" class="text-3xl font-bold gradient-text">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html> 
