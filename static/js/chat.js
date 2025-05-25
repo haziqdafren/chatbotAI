@@ -133,8 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(url, {
                     ...options,
-                    credentials: 'include',
-                    mode: 'cors'
+                    credentials: 'same-origin',
+                    mode: 'cors',
+                    headers: {
+                        ...options.headers,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
                 });
                 console.log(`API Response status: ${response.status}`);
                 if (!response.ok) {
@@ -251,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', (e) => {
             console.log(`Menu button ${index} clicked`);
             e.preventDefault();
+            e.stopPropagation();
             
             // Add click animation
             button.style.transform = 'scale(0.95)';
@@ -298,6 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backToMenuBtn.addEventListener('click', (e) => {
         console.log('Back to menu button clicked');
         e.preventDefault();
+        e.stopPropagation();
         try {
             stopDemo();
             chatContainer.classList.add('hidden');
@@ -311,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     backToMenuStatsBtn.addEventListener('click', (e) => {
         console.log('Back to menu from stats button clicked');
         e.preventDefault();
+        e.stopPropagation();
         try {
             statsContainer.classList.add('hidden');
             menuContainer.classList.remove('hidden');
@@ -324,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatForm.addEventListener('submit', async (e) => {
         console.log('Chat form submitted');
         e.preventDefault();
+        e.stopPropagation();
         
         const message = userInput.value.trim();
         if (!message) return;
