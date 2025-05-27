@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to show statistics
     async function showStatistics() {
         try {
-            const data = await makeApiCall('/api/statistics');
+            const data = await makeApiCall('/api/statistics', {});
             
             // Animate statistics numbers
             animateNumber('total-intents', data.total_intents);
